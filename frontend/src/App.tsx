@@ -1,56 +1,35 @@
-import { useEffect, useState } from 'react'
-import './App.css'
+import { BrowserRouter, Routes, Route } from "react-router-dom"
 
-interface Veiculo {
-  id_veiculo: number
-  placa: string
-  marca: string
-  modelo: string
-  ano: number
-  tipo: string
-  status: string
-}
+import MainLayout from "./Layout/MainLayout"
 
 
+import Dashboard from "./pages/Dashboard"
+/*import Veiculo from "./pages/Veiculo"
+import Motorista from "./pages/Motorista"
+import Viagem from "./pages/Viagem"
+import Cidade from "./pages/Cidade";
+import Manutencao from "./pages/Manutencao"
+import Abastecimento from "./pages/Abastecimento"*/
+
+/*
+<Route path="/veiculos" element={<Veiculo />} />
+          <Route path="/motoristas" element={<Motorista />} />
+          <Route path="/viagens" element={<Viagem />} />
+          <Route path="/cidades" element={<Cidade />} />
+          <Route path="/manutencoes" element={<Manutencao />} />
+          <Route path="/abastecimentos" element={<Abastecimento />} />
+*/
 function App() {
-  const [veiculos, setVeiculos] = useState<Veiculo[]>([])
-
-    useEffect(() => {
-  fetch('http://localhost:3001/veiculos')
-    .then(response => response.json())
-    .then(data => setVeiculos(data))
-    .catch(error => console.error('Erro ao buscar veículos:', error))
-}, [])
-
-    return (
-      <div>
-        <h1>Gerenciador de Frota</h1>
-        <table border={1}>
-        <thead>
-          <tr>
-            <th>Placa</th>
-            <th>Marca</th>
-            <th>Modelo</th>
-            <th>Ano</th>
-            <th>Tipo</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-          <tbody>
-            {veiculos.map(veiculo => (
-              <tr key={veiculo.id_veiculo}>
-              <td>{veiculo.placa}</td>
-              <td>{veiculo.marca}</td>
-              <td>{veiculo.modelo}</td>
-              <td>{veiculo.ano}</td>
-              <td>{veiculo.tipo}</td>
-              <td>{veiculo.status}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-    )     
+  return(
+    <BrowserRouter>
+      <Routes>
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Dashboard />} />
+          
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
 export default App

@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { pool } from '../db'
-import { simularViagem } from '../services/simulacao.service'
+import { simularViagem, finalizarViagem } from '../services/simulacao.service'
 
 const router = Router()
 
@@ -35,6 +35,15 @@ router.post('/simular/:idVeiculo', async (req, res) => {
   try {
     const viagem = await simularViagem(Number(req.params.idVeiculo))
     res.status(201).json(viagem)
+  } catch (error: any) {
+    res.status(400).json({ error: error.message })
+  }
+})
+
+router.post('/finalizar/:idViagem', async (req, res) => {
+  try {
+    const resultado = await finalizarViagem(Number(req.params.idViagem))
+    res.status(200).json(resultado)
   } catch (error: any) {
     res.status(400).json({ error: error.message })
   }
