@@ -29,10 +29,12 @@ export async function finalizarViagem(idViagem: number) {
       SELECT 
         id_viagem,
         id_veiculo,
+        id_motorista
         km_inicial,
         status_viagem
       FROM viagem
       WHERE id_viagem = $1
+      FOR UPDATE
       `,
       [idViagem]
     )
@@ -58,6 +60,15 @@ export async function finalizarViagem(idViagem: number) {
       WHERE id_veiculo = $3
       `,
       [kmFinal, STATUS_VEICULO.ATIVO, viagem.id_veiculo]
+    )
+
+      await client.query(
+      `
+      UPDATE motorista
+      SET status = 'ativo'
+      WHERE id_motorista = $1
+      `,
+      [viagem.id_motorista]
     )
 
     await client.query(
@@ -192,6 +203,13 @@ export async function simularViagem(idVeiculo: number) {
       WHERE id_veiculo = $1
       `,
       [idVeiculo]
+    )
+
+    await client.query(
+      `UPDATE motorista
+      SET status = 'em_viagem'
+      WHERE id_motorista = $1`,
+      [idMotorista]
     )
 
     await client.query('COMMIT')
