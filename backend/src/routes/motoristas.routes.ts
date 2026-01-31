@@ -1,34 +1,329 @@
 import { Router, Request, Response } from 'express'
 import pool from '../db'
+import { asyncHandler, AppError } from '../middleware/errorHandler'
+import {
+  validarCPF,
+  validarCNH,
+  validarCategoriaCNH,
+  validarDataFutura
+} from '../utils/validators'
 
 const router = Router()
 
-// ✅ GET /motoristas
-router.get('/', async (_req, res) => {
-  try {
-    const result = await pool.query(`SELECT * FROM motorista ORDER BY nome`)
-    res.json(result.rows)
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ erro: 'Erro ao buscar veículos' })
+// ✅ GET /motoristas - Listar todos os motoristas
+router.get('/', asyncHandler(async (req: Request, res: Response) => {
+  const { status } = req.query
+  
+  let query = 'SELECT * FROM motorista'
+  const params: any[] = []
+  
+  if (status) {
+    query += ' WHERE status = $1'
+    params.push(status)
   }
-})
+  
+  query += ' ORDER BY nome'
+  
+  const result = await pool.query(query, params)
+  res.json(result.rows)
+}))
 
-router.post('/', async (req: Request, res: Response) => {
-  const { id_motorista,nome, cpf, cnh, cat_cnh, validade_cnh } = req.body 
+// ✅ GET /motoristas/:id - Buscar motorista por ID
+router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params
+  
+  const result = await pool.query(
+    'SELECT * FROM motorista WHERE id_motorista = $1',
+    [id]
+  )
+  
+  if (result.rowCount === 0) {
+    throw new AppError('Motorista não encontrado', 404)
+  }
+  
+  res.json(result.rows[0])
+}))
 
-  try {
+// ✅ POST /motoristas - Criar novo motorista
+router.post('/', asyncHandler(async (req: Request, res: Response) => {
+  const {
+    nome,
+    cpf,
+    cnh,
+    cat_cnh,
+    validade_cnh,
+    status = 'ativo'
+  } = req.body
+
+  // Validações obrigatórias
+  if (!nome || !cpf || !cnh || !cat_cnh || !validade_cnh) {
+    throw new AppError('Nome, CPF, CNH, categoria e validade são obrigatórios')
+  }
+
+  // Validar CPF
+  if (!validarCPF(cpf)) {
+    throw new AppError('CPF inválido')
+  }
+
+  // Validar CNH
+  if (!validarCNH(cnh)) {
+    throw new AppError('CNH inválida')
+  }
+
+  // Validar categoria CNH
+  if (!validarCategoriaCNH(cat_cnh)) {
+    throw new AppError('Categoria de CNH inválida (válidas: A, B, AB, C, D, E, AC, AD, AE)')
+  }
+
+  // Validar validade da CNH
+  if (!validarDataFutura(validade_cnh)) {
+    throw new AppError('Data de validade da CNH inválida ou vencida')
+  }
+
+  // Verificar se CPF já existe
+  const cpfExiste = await pool.query(
+    'SELECT id_motorista FROM motorista WHERE cpf = $1',
+    [cpf.replace(/[^\d]/g, '')]
+  )
+
+  if (cpfExiste.rowCount! > 0) {
+    throw new AppError('Já existe um motorista com este CPF', 409)
+  }
+
+  // Verificar se CNH já existe
+  const cnhExiste = await pool.query(
+    'SELECT id_motorista FROM motorista WHERE cnh = $1',
+    [cnh.replace(/[^\d]/g, '')]
+  )
+
+  if (cnhExiste.rowCount! > 0) {
+    throw new AppError('Já existe um motorista com esta CNH', 409)
+  }
+
+  const { rows } = await pool.query(
+    `INSERT INTO motorista (nome, cpf, cnh, cat_cnh, validade_cnh, status)
+     VALUES ($1, $2, $3, $4, $5, $6)
+     RETURNING *`,
+    [
+      nome,
+      cpf.replace(/[^\d]/g, ''),
+      cnh.replace(/[^\d]/g, ''),
+      cat_cnh.toUpperCase(),
+      validade_cnh,
+      status
+    ]
+  )
+
+  res.status(201).json(rows[0])
+}))
+
+// ✅ PUT /motoristas/:id - Atualizar motorista
+router.put('/:id', asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params
+  const {
+    nome,
+    cpf,
+    cnh,
+    cat_cnh,
+    validade_cnh,
+    status
+  } = req.body
+
+  // Verificar se motorista existe
+  const motoristaExiste = await pool.query(
+    'SELECT * FROM motorista WHERE id_motorista = $1',
+    [id]
+  )
+
+  if (motoristaExiste.rowCount === 0) {
+    throw new AppError('Motorista não encontrado', 404)
+  }
+
+  const motoristaAtual = motoristaExiste.rows[0]
+
+  // Validações
+  if (cpf && !validarCPF(cpf)) {
+    throw new AppError('CPF inválido')
+  }
+
+  if (cnh && !validarCNH(cnh)) {
+    throw new AppError('CNH inválida')
+  }
+
+  if (cat_cnh && !validarCategoriaCNH(cat_cnh)) {
+    throw new AppError('Categoria de CNH inválida')
+  }
+
+  if (validade_cnh && !validarDataFutura(validade_cnh)) {
+    throw new AppError('Data de validade da CNH inválida ou vencida')
+  }
+
+  // Verificar se novo CPF já existe (se diferente do atual)
+  if (cpf) {
+    const cpfLimpo = cpf.replace(/[^\d]/g, '')
+    if (cpfLimpo !== motoristaAtual.cpf) {
+      const cpfExiste = await pool.query(
+        'SELECT id_motorista FROM motorista WHERE cpf = $1',
+        [cpfLimpo]
+      )
+
+      if (cpfExiste.rowCount! > 0) {
+        throw new AppError('Já existe um motorista com este CPF', 409)
+      }
+    }
+  }
+
+  // Verificar se nova CNH já existe (se diferente da atual)
+  if (cnh) {
+    const cnhLimpa = cnh.replace(/[^\d]/g, '')
+    if (cnhLimpa !== motoristaAtual.cnh) {
+      const cnhExiste = await pool.query(
+        'SELECT id_motorista FROM motorista WHERE cnh = $1',
+        [cnhLimpa]
+      )
+
+      if (cnhExiste.rowCount! > 0) {
+        throw new AppError('Já existe um motorista com esta CNH', 409)
+      }
+    }
+  }
+
+  const { rows } = await pool.query(
+    `UPDATE motorista
+     SET 
+       nome = COALESCE($1, nome),
+       cpf = COALESCE($2, cpf),
+       cnh = COALESCE($3, cnh),
+       cat_cnh = COALESCE($4, cat_cnh),
+       validade_cnh = COALESCE($5, validade_cnh),
+       status = COALESCE($6, status)
+     WHERE id_motorista = $7
+     RETURNING *`,
+    [
+      nome,
+      cpf?.replace(/[^\d]/g, ''),
+      cnh?.replace(/[^\d]/g, ''),
+      cat_cnh?.toUpperCase(),
+      validade_cnh,
+      status,
+      id
+    ]
+  )
+
+  res.json(rows[0])
+}))
+
+// ✅ DELETE /motoristas/:id - Deletar motorista
+router.delete('/:id', asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params
+
+  // Verificar se motorista existe
+  const motoristaExiste = await pool.query(
+    'SELECT * FROM motorista WHERE id_motorista = $1',
+    [id]
+  )
+
+  if (motoristaExiste.rowCount === 0) {
+    throw new AppError('Motorista não encontrado', 404)
+  }
+
+  // Verificar se motorista está em viagem
+  const emViagem = await pool.query(
+    `SELECT id_viagem FROM viagem 
+     WHERE id_motorista = $1 AND status_viagem = 'em_andamento'`,
+    [id]
+  )
+
+  if (emViagem.rowCount! > 0) {
+    throw new AppError('Não é possível excluir motorista que está em viagem', 400)
+  }
+
+  // Verificar se tem histórico de viagens
+  const temHistorico = await pool.query(
+    'SELECT id_viagem FROM viagem WHERE id_motorista = $1 LIMIT 1',
+    [id]
+  )
+
+  if (temHistorico.rowCount! > 0) {
+    // Se tem histórico, apenas inativa
     const { rows } = await pool.query(
-      `INSERT INTO motorista (id_motorista,nome, cpf, cnh, cat_cnh, validade_cnh)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING *`,
-      [id_motorista, nome, cpf, cnh, cat_cnh, validade_cnh]
+      `UPDATE motorista SET status = 'inativo' WHERE id_motorista = $1 RETURNING *`,
+      [id]
     )
-    res.status(201).json(rows[0])
-  } catch (error) {
-    res.status(500).json({ error: 'Erro ao criar motorista' })
+    return res.json({
+      message: 'Motorista inativado (possui histórico de viagens)',
+      motorista: rows[0]
+    })
   }
 
-})
+  // Se não tem histórico, pode deletar
+  await pool.query('DELETE FROM motorista WHERE id_motorista = $1', [id])
+  
+  res.json({ message: 'Motorista excluído com sucesso' })
+}))
+
+// ✅ GET /motoristas/:id/historico - Histórico do motorista
+router.get('/:id/historico', asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params
+
+  const motorista = await pool.query(
+    'SELECT * FROM motorista WHERE id_motorista = $1',
+    [id]
+  )
+
+  if (motorista.rowCount === 0) {
+    throw new AppError('Motorista não encontrado', 404)
+  }
+
+  // Buscar viagens
+  const viagens = await pool.query(
+    `SELECT 
+      v.*,
+      ve.placa,
+      ve.modelo,
+      c1.nome AS origem,
+      c2.nome AS destino
+     FROM viagem v
+     JOIN veiculo ve ON ve.id_veiculo = v.id_veiculo
+     JOIN cidade c1 ON c1.id_cidade = v.cidade_origem
+     JOIN cidade c2 ON c2.id_cidade = v.cidade_destino
+     WHERE v.id_motorista = $1
+     ORDER BY v.data_saida DESC`,
+    [id]
+  )
+
+  // Calcular estatísticas
+  const totalKm = viagens.rows
+    .filter(v => v.km_final)
+    .reduce((acc, v) => acc + (v.km_final - v.km_inicial), 0)
+
+  res.json({
+    motorista: motorista.rows[0],
+    viagens: viagens.rows,
+    estatisticas: {
+      total_viagens: viagens.rowCount,
+      total_km_rodados: totalKm,
+      viagens_em_andamento: viagens.rows.filter(v => v.status_viagem === 'em_andamento').length
+    }
+  })
+}))
+
+// ✅ GET /motoristas/disponiveis - Listar motoristas disponíveis
+router.get('/disponiveis/lista', asyncHandler(async (req: Request, res: Response) => {
+  const result = await pool.query(
+    `SELECT m.*
+     FROM motorista m
+     WHERE m.status = 'ativo'
+       AND m.validade_cnh > CURRENT_DATE
+       AND NOT EXISTS (
+         SELECT 1 FROM viagem v
+         WHERE v.id_motorista = m.id_motorista
+           AND v.status_viagem = 'em_andamento'
+       )
+     ORDER BY m.nome`
+  )
+
+  res.json(result.rows)
+}))
 
 export default router
