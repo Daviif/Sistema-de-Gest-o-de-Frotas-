@@ -69,6 +69,19 @@ export function validarCategoriaCNH(categoria: string): boolean {
   return categoriasValidas.includes(categoria.toUpperCase())
 }
 
+
+export function validarTipoVeiculo(tipo: string): string | null {
+  const normalizar = (str: string) => 
+  str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+  const tiposValidos = ['Caminhão', 'Caminhão-trator', 'Caminhonete', 'Camioneta', 'Micro-ônibus', 
+    'Motocicleta', 'Motoneta', 'Ônibus', 'Reboque', 'Semi-reboque', 'Utilitário', 'Basculante', 'Munck'
+  ];
+
+  const busca = normalizar(tipo);
+
+  return tiposValidos.find(t => normalizar(t) === busca) || null;
+}
 export function validarTipoCombustivel(tipo: string): boolean {
   const tiposValidos = ['gasolina', 'etanol', 'diesel', 'gnv', 'flex']
   return tiposValidos.includes(tipo.toLowerCase())

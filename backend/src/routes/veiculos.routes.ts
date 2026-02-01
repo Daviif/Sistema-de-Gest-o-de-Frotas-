@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express'
 import pool from '../db'
 import { asyncHandler, AppError } from '../middleware/errorHandler'
-import { validarPlaca, validarStatusVeiculo, validarValorPositivo } from '../utils/validators'
+import { validarPlaca, validarStatusVeiculo, validarValorPositivo, validarTipoVeiculo } from '../utils/validators'
 
 
 const router = Router()
@@ -39,10 +39,10 @@ router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
 }))
 
 router.post('/', asyncHandler(async (req: Request, res: Response) => {
-  const { placa, marca, modelo, ano, km_atual, status = 'ativo'} = req.body
+  const { placa, marca, modelo, ano, tipo, km_atual, status = 'ativo'} = req.body
 
-  if (!placa || !modelo || !marca) {
-    throw new AppError('Placa, modelo e marca são obrigatórios')
+  if (!placa || !modelo || !marca || !tipo) {
+    throw new AppError('Placa, modelo, marca e tipo são obrigatórios')
   }
 
   if (!validarPlaca(placa)) {
@@ -61,6 +61,11 @@ router.post('/', asyncHandler(async (req: Request, res: Response) => {
     throw new AppError('Quilometragem deve ser um valor positivo')
   }
 
+  const tipoCorreto = validarTipoVeiculo(tipo)
+
+  if (!tipoCorreto) {
+    throw new AppError('Tipo de veículo inválido')
+  }
   // Verificar se placa já existe
   const placaExiste = await pool.query(
     'SELECT id_veiculo FROM veiculo WHERE placa = $1',
@@ -72,10 +77,10 @@ router.post('/', asyncHandler(async (req: Request, res: Response) => {
   }
 
   const { rows } = await pool.query(
-    `INSERT INTO veiculo (placa, modelo, marca, ano, km_atual, status)
-     VALUES ($1, $2, $3, $4, $5, $6)
+    `INSERT INTO veiculo (placa, modelo, marca, ano, tipo, km_atual, status)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
      RETURNING *`,
-    [placa.toUpperCase(), modelo, marca, ano, km_atual || 0, status]
+    [placa.toUpperCase(), modelo, marca, ano, tipoCorreto, km_atual || 0, status]
   )
 
   res.status(201).json(rows[0])
