@@ -42,7 +42,7 @@ export async function finalizarViagem(idViagem: number) {
       SELECT 
         id_viagem,
         id_veiculo,
-        cpf_motorista
+        cpf_motorista,
         km_inicial,
         status_viagem,
         data_saida
@@ -83,7 +83,7 @@ export async function finalizarViagem(idViagem: number) {
       `
       UPDATE motorista
       SET status = $1
-      WHERE cpf_motorista = $2
+      WHERE cpf = $2
       `,
       [STATUS_MOTORISTA.ATIVO, viagem.cpf_motorista]
     )
@@ -161,7 +161,7 @@ export async function cancelarViagem(idViagem: number, motivo?: string) {
     await client.query(
       `UPDATE motorista
        SET status = $1
-       WHERE cpf_motorista = $2`,
+       WHERE cpf = $2`,
       [STATUS_MOTORISTA.ATIVO, viagem.cpf_motorista]
     )
 
@@ -314,7 +314,7 @@ export async function simularViagem(idVeiculo: number, params?: {
     const viagemRes = await client.query(
       `INSERT INTO viagem (
          id_veiculo,
-         cpf,
+         cpf_motorista,
          cidade_origem,
          cidade_destino,
          data_saida,
@@ -345,7 +345,7 @@ export async function simularViagem(idVeiculo: number, params?: {
     await client.query(
       `UPDATE motorista
        SET status = $1
-       WHERE cpf_motorista = $2`,
+       WHERE cpf = $2`,
       [STATUS_MOTORISTA.EM_VIAGEM, cpfMotorista]
     )
 
