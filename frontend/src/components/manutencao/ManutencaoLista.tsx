@@ -5,6 +5,8 @@ import { Plus, Wrench, Calendar, DollarSign, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import ManutencaoForm from './ManutencaoForm'
 import { api } from '@/lib/api'
 import { Maintenance, MaintenanceType } from '@/types'
 import {
@@ -17,7 +19,12 @@ import {
 
 export default function MaintenanceList() {
   const [typeFilter, setTypeFilter] = useState<string>('')
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
   
+  function handleTypeChange(value: string) {
+    setTypeFilter(value === '__all__' ? '' : value)
+  }
+
   const { data: maintenances, isLoading } = useQuery({
     queryKey: ['maintenances', typeFilter],
     queryFn: async () => {
@@ -31,7 +38,7 @@ export default function MaintenanceList() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -41,26 +48,38 @@ export default function MaintenanceList() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Manutenções</h1>
-          <p className="text-slate-500 mt-1">
+          <h1 className="text-3xl font-bold text-foreground">Manutenções</h1>
+          <p className="text-muted-foreground mt-1">
             Gerencie as manutenções da frota
           </p>
         </div>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          Nova Manutenção
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Nova Manutenção
+            </Button>
+          </DialogTrigger>
+
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Nova Manutenção</DialogTitle>
+            </DialogHeader>
+
+            <ManutencaoForm onSuccess={() => setIsDialogOpen(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Filters */}
       <Card className="p-4">
         <div className="flex gap-4">
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <Select value={typeFilter} onValueChange={handleTypeChange}>
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Todos os tipos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="__all__">Todos</SelectItem>
               <SelectItem value={MaintenanceType.PREVENTIVE}>Preventiva</SelectItem>
               <SelectItem value={MaintenanceType.CORRECTIVE}>Corretiva</SelectItem>
               <SelectItem value={MaintenanceType.PREDICTIVE}>Preditiva</SelectItem>
@@ -76,11 +95,11 @@ export default function MaintenanceList() {
           <Card key={maintenance.id_manutencao} className="p-6">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${maintenance.concluida ? 'bg-green-50' : 'bg-amber-50'}`}>
+                <div className={`p-2 rounded-lg ${maintenance.concluida ? 'status-success' : 'status-warning'}`}>
                   {maintenance.concluida ? (
-                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <CheckCircle className="w-5 h-5" />
                   ) : (
-                    <Wrench className="w-5 h-5 text-amber-600" />
+                    <Wrench className="w-5 h-5" />
                   )}
                 </div>
                 <div>
@@ -88,12 +107,12 @@ export default function MaintenanceList() {
                     <h3 className="font-semibold text-lg">{maintenance.descricao}</h3>
                     <TypeBadge type={maintenance.tipo} />
                     {maintenance.concluida && (
-                      <Badge className="bg-green-100 text-green-700">
+                      <Badge className="status-success">
                         Concluída
                       </Badge>
                     )}
                   </div>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-muted-foreground">
                     {maintenance.placa} - {maintenance.modelo}
                   </p>
                 </div>
@@ -102,9 +121,9 @@ export default function MaintenanceList() {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-slate-400" />
+                <Calendar className="w-4 h-4 text-muted" />
                 <div>
-                  <p className="text-slate-500">Data</p>
+                  <p className="text-muted-foreground">Data</p>
                   <p className="font-medium">
                     {new Date(maintenance.data_man).toLocaleDateString('pt-BR')}
                   </p>
@@ -112,25 +131,25 @@ export default function MaintenanceList() {
               </div>
 
               <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-slate-400" />
+                <DollarSign className="w-4 h-4 text-muted" />
                 <div>
-                  <p className="text-slate-500">Valor</p>
+                  <p className="text-muted-foreground">Valor</p>
                   <p className="font-medium">
-                    R$ {maintenance.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    R$ {maintenance.valor !== undefined && maintenance.valor !== null ? maintenance.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '-'}
                   </p>
                 </div>
               </div>
 
               {maintenance.km_manutencao && (
                 <div>
-                  <p className="text-slate-500">KM</p>
-                  <p className="font-medium">{maintenance.km_manutencao.toLocaleString('pt-BR')}</p>
+                  <p className="text-muted-foreground">KM</p>
+                  <p className="font-medium">{maintenance.km_manutencao !== undefined && maintenance.km_manutencao !== null ? maintenance.km_manutencao.toLocaleString('pt-BR') : '-'}</p>
                 </div>
               )}
 
               {maintenance.fornecedor && (
                 <div>
-                  <p className="text-slate-500">Fornecedor</p>
+                  <p className="text-muted-foreground">Fornecedor</p>
                   <p className="font-medium">{maintenance.fornecedor}</p>
                 </div>
               )}
@@ -152,7 +171,7 @@ export default function MaintenanceList() {
 
       {maintenances?.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-slate-500">Nenhuma manutenção encontrada</p>
+          <p className="text-muted-foreground">Nenhuma manutenção encontrada</p>
         </div>
       )}
     </div>
@@ -161,10 +180,10 @@ export default function MaintenanceList() {
 
 function TypeBadge({ type }: { type: MaintenanceType }) {
   const colors = {
-    [MaintenanceType.PREVENTIVE]: 'bg-blue-100 text-blue-700',
-    [MaintenanceType.CORRECTIVE]: 'bg-red-100 text-red-700',
-    [MaintenanceType.PREDICTIVE]: 'bg-purple-100 text-purple-700',
-    [MaintenanceType.REVISION]: 'bg-amber-100 text-amber-700',
+    [MaintenanceType.PREVENTIVE]: 'bg-primary/10 text-primary',
+    [MaintenanceType.CORRECTIVE]: 'status-danger',
+    [MaintenanceType.PREDICTIVE]: 'status-info',
+    [MaintenanceType.REVISION]: 'status-warning',
   }
 
   const labels = {
