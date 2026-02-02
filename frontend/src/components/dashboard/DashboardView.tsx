@@ -1,41 +1,40 @@
 // src/components/dashboard/DashboardView.tsx
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts'
-import { AlertTriangle, CheckCircle, Clock, TrendingUp, AlertOctagon, Truck, Users } from 'lucide-react'
+import { AlertTriangle, CheckCircle, Clock, AlertOctagon, Truck, Users, LucideIcon } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useStats } from '@/hooks/useStats'
-import { useDrivers } from '@/hooks/useDrivers'
-import { useVehicles } from '@/hooks/useVehicles'
+import { useDrivers } from '@/hooks/useMotorista'
+import { useVehicles } from '@/hooks/useVeiculos'
 import { Driver, Vehicle, VehicleStatus } from '@/types'
 
+interface StatCardProps {
+  title: string
+  value: string | number
+  icon: LucideIcon
+  color: 'blue' | 'green' | 'amber' | 'red'
+}
 export default function DashboardView() {
   const { data: stats, isLoading: statsLoading } = useStats()
   const { data: drivers } = useDrivers()
   const { data: vehicles } = useVehicles()
-  
-  const [alerts, setAlerts] = useState<{drivers: Driver[], vehicles: Vehicle[]}>({
-    drivers: [], 
-    vehicles: []
-  })
 
-  useEffect(() => {
-    if (drivers && vehicles) {
-      // Filter drivers with CNH expiring in 3 months
-      const expiringDrivers = drivers.filter(d => {
-        const expiry = new Date(d.validade_cnh)
-        const today = new Date()
-        const threeMonths = new Date()
-        threeMonths.setMonth(today.getMonth() + 3)
-        return expiry < threeMonths && expiry > today
-      })
+  const alerts = useMemo(() => {
+    if (!drivers || !vehicles) return { drivers: [], vehicles: [] }
 
-      // Filter vehicles with high mileage
-      const maintenanceVehicles = vehicles.filter(v => 
-        v.km_atual > 100000 && v.status !== VehicleStatus.MAINTENANCE
-      )
+    const expiringDrivers = drivers.filter((d: Driver) => { // MUDANÇA: Tipagem explícita
+      const expiry = new Date(d.validade_cnh)
+      const today = new Date()
+      const threeMonths = new Date()
+      threeMonths.setMonth(today.getMonth() + 3)
+      return expiry < threeMonths && expiry > today
+    })
 
-      setAlerts({ drivers: expiringDrivers, vehicles: maintenanceVehicles })
-    }
+    const maintenanceVehicles = vehicles.filter((v: Vehicle) => // MUDANÇA: Tipagem explícita
+      v.km_atual > 100000 && v.status !== VehicleStatus.MAINTENANCE
+    )
+
+    return { drivers: expiringDrivers, vehicles: maintenanceVehicles }
   }, [drivers, vehicles])
 
   if (statsLoading) {
@@ -182,12 +181,8 @@ function StatCard({
   value, 
   icon: Icon, 
   color 
-}: { 
-  title: string
-  value: string | number
-  icon: any
-  color: string 
-}) {
+}: StatCardProps) {
+  
   const colorClasses: Record<string, string> = {
     blue: 'bg-blue-50 text-blue-600',
     green: 'bg-green-50 text-green-600',

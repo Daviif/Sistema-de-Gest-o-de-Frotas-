@@ -1,7 +1,7 @@
 // src/components/manutencao/ManutencaoLista.tsx
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Plus, Wrench, Calendar, DollarSign, CheckCircle, XCircle } from 'lucide-react'
+import { Plus, Wrench, Calendar, DollarSign, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'

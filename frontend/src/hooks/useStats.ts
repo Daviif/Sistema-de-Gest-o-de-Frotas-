@@ -1,7 +1,7 @@
 // src/hooks/useStats.ts
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { DashboardStats } from '@/types'
+import { DashboardStats, Driver } from '@/types'
 
 async function fetchStats(): Promise<DashboardStats> {
   // Buscar dados de múltiplos endpoints
@@ -13,13 +13,10 @@ async function fetchStats(): Promise<DashboardStats> {
   ])
 
   // Buscar estatísticas de viagens
-  const tripsStats = await api.get('/viagens/estatisticas/geral', {
-    params: { meses: 6 }
-  })
 
   return {
     totalVehicles: vehicles.data.length,
-    activeDrivers: drivers.data.filter((d: any) => d.status === 'ativo').length,
+    activeDrivers: drivers.data.filter((d: Driver) => d.status === 'ativo').length,
     tripsInProgress: trips.data.length,
     maintenancePending: maintenance.data.length,
     

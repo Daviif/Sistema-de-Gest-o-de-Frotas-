@@ -44,8 +44,9 @@ export function useCreateVehicle() {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.all })
       toast.success('Veículo cadastrado com sucesso!')
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erro ao cadastrar veículo')
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : 'Erro ao cadastrar veículo'
+      toast.error(message)
     },
   })
 }
@@ -63,8 +64,9 @@ export function useUpdateVehicle() {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.detail(variables.id) })
       toast.success('Veículo atualizado com sucesso!')
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erro ao atualizar veículo')
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : 'Erro ao atualizar veículo'
+      toast.error(message)
     },
   })
 }
@@ -80,8 +82,9 @@ export function useDeleteVehicle() {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.all })
       toast.success('Veículo excluído com sucesso!')
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erro ao excluir veículo')
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : 'Erro ao excluir veículo'
+      toast.error(message)
     },
   })
 }

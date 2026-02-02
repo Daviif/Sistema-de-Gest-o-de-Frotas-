@@ -55,8 +55,9 @@ export function useCreateDriver() {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.all })
       toast.success('Motorista cadastrado com sucesso!')
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erro ao cadastrar motorista')
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : 'Erro ao cadastrar motorista'
+      toast.error(message)
     },
   })
 }
@@ -74,8 +75,9 @@ export function useUpdateDriver() {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.detail(variables.cpf) })
       toast.success('Motorista atualizado com sucesso!')
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erro ao atualizar motorista')
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : 'Erro ao atualizar motorista'
+      toast.error(message)
     },
   })
 }
@@ -91,8 +93,9 @@ export function useDeleteDriver() {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.all })
       toast.success('Motorista excluído com sucesso!')
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Erro ao excluir motorista')
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : 'Erro ao excluir motorista'
+      toast.error(message)
     },
   })
 }

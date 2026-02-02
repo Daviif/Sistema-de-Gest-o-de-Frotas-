@@ -4,7 +4,7 @@ import { Plus, Search, Calendar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
-import { useDrivers } from '@/hooks/useDrivers'
+import { useDrivers } from '@/hooks/useMotorista'
 import { 
   Select,
   SelectContent,
@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { DriverStatus } from '@/types'
+import { Driver, DriverStatus } from '@/types'
 
 export default function DriversList() {
   const [statusFilter, setStatusFilter] = useState<string>('')
@@ -20,7 +20,7 @@ export default function DriversList() {
   
   const { data: drivers, isLoading } = useDrivers(statusFilter)
 
-  const filteredDrivers = drivers?.filter(d => 
+  const filteredDrivers = drivers?.filter((d: Driver) => 
     d.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
     d.cpf.includes(searchTerm.replace(/\D/g, '')) ||
     d.cnh.includes(searchTerm.replace(/\D/g, ''))
@@ -78,7 +78,7 @@ export default function DriversList() {
 
       {/* Driver List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredDrivers?.map((driver) => (
+        {filteredDrivers?.map((driver: Driver) => (
           <Card key={driver.cpf} className="p-6">
             <div className="flex items-start justify-between mb-4">
               <div>
