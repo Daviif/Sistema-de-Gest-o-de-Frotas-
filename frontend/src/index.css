@@ -27,6 +27,15 @@
     --input: 214 14% 98%; /* campos quase brancos */
     --ring: 212 95% 45%;
     --radius: 0.875rem; /* cantos um pouco mais arredondados */
+
+    /* Semantic colors */
+    --success: 145 63% 41%; /* verde */
+    --warning: 42 100% 50%; /* âmbar */
+    --danger: 12 100% 55%; /* vermelho */
+    --info: 212 95% 45%; /* azul claro */
+
+    --overlay-bg: rgb(0 0 0 / 0.45);
+    --overlay-blur: 6px;
   }
 
   .dark {
@@ -49,6 +58,14 @@
     --border: 0 0% 12%;
     --input: 0 0% 10%;
     --ring: 140 60% 50%;
+    /* Semantic colors for dark */
+    --success: 140 60% 45%;
+    --warning: 42 100% 50%;
+    --danger: 0 70% 45%;
+    --info: 140 60% 45%;
+
+    --overlay-bg: 0 0 0 / 0.5;
+    --overlay-blur: 6px;
   }
 }
 
@@ -128,7 +145,7 @@
   .overlay { @apply bg-black/40; }
 
   body {
-    @apply bg-background text-foreground;
+    background-color: rgb(var(--overlay-bg));
   }
 
   /* Semantic status utilities */
@@ -167,6 +184,23 @@
   .overlay { background-color: rgb(0 0 0 / 0.5); }
   .overlay.light { background-color: rgb(0 0 0 / 0.45); }
   .overlay.dark { background-color: rgb(255 255 255 / 0.06); }
+
+  /* Darken header & sidebar when a dialog is open to match overlay opacity */
+  .dialog-open [data-slot="site-header"], .dialog-open [data-slot="site-sidebar"] {
+    background-color: rgb(var(--overlay-bg));
+    backdrop-filter: blur(var(--overlay-blur));
+    -webkit-backdrop-filter: blur(var(--overlay-blur));
+  }
+  .dialog-open .dark [data-slot="site-header"], .dialog-open .dark [data-slot="site-sidebar"] {
+    background-color: rgb(var(--overlay-bg));
+    backdrop-filter: blur(var(--overlay-blur));
+    -webkit-backdrop-filter: blur(var(--overlay-blur));
+  }
+
+  /* Make sidebar and header share the same shadow look */
+  [data-slot="site-sidebar"], [data-slot="site-header"] {
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.07);
+  }
 
   /* Direct background utilities for semantic colors */
   .bg-danger { background-color: hsl(var(--danger)); }

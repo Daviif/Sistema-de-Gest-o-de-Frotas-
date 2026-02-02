@@ -57,7 +57,7 @@ export default function Layout({ children }: LayoutProps) {
       </div>
 
       {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col lg:z-40">
         <SidebarContent 
           navigation={navigation} 
           currentPath={location.pathname} 
@@ -93,7 +93,7 @@ function SidebarContent({
   onClose?: () => void
 }) {
   return (
-    <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-card px-6 pb-4">
+    <div data-slot="site-sidebar" className="flex grow flex-col gap-y-5 overflow-y-auto bg-card px-6 pb-4 shadow-lg">
       {/* Logo */}
       <div className="flex h-16 shrink-0 items-center justify-between">
         <div className="flex items-center gap-2">

@@ -7,7 +7,7 @@ export default function Header({ onOpenSidebar }: { onOpenSidebar?: () => void }
   const toggle = useUIStore((s: UIState) => s.toggle)
 
   return (
-    <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-card px-4 shadow-md sm:gap-x-6 sm:px-6 lg:px-8">
+    <div data-slot="site-header" className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-card px-4 shadow-lg sm:gap-x-6 sm:px-6 lg:pl-64 lg:px-8">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" className="lg:hidden" onClick={onOpenSidebar} aria-label="Abrir menu">
           <Menu className="h-6 w-6 text-muted-foreground" />

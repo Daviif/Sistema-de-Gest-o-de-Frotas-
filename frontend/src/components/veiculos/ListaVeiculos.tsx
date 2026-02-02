@@ -53,7 +53,7 @@ export default function VehiclesList() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-primary">Veículos</h1>
+          <h1 className="text-3xl font-bold text-foreground">Veículos</h1>
           <p className="text-muted-foreground mt-1">
             Gerencie a frota de veículos
           </p>

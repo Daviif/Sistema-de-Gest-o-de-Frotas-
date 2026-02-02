@@ -48,6 +48,10 @@ export default function DashboardView() {
 
   return (
     <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+        <p className="text-muted-foreground mt-1">Visão geral da frota</p>
+      </div>
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard 
@@ -195,7 +199,7 @@ function StatCard({
     <Card>
       <CardContent className="p-6 flex items-center">
         <div className={`p-3 rounded-lg mr-4 ${colorClasses[color]}`}>
-          <Icon className="w-6 h-6" />
+          <Icon className="w-6 h-6 text-current" />
         </div>
         <div>
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
