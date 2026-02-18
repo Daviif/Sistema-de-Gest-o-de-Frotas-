@@ -23,7 +23,6 @@ export default function Header({ onOpenSidebar }: { onOpenSidebar?: () => void }
             if (typeof window !== 'undefined') {
               const hasDark = document.documentElement.classList.contains('dark')
               const bg = getComputedStyle(document.documentElement).getPropertyValue('--background')
-              // eslint-disable-next-line no-console
               console.log('[theme] toggled:', { dark: hasDark, '--background': bg?.trim() })
             }
           }} aria-label="Alternar tema">

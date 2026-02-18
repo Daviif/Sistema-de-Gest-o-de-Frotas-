@@ -118,6 +118,7 @@ export default function VehiclesList() {
             </DialogHeader>
 
             <VeiculosForm
+              key={vehicleToEdit?.id_veiculo ?? 'new'}
               initialData={vehicleToEdit}
               onSuccess={() => setIsDialogOpen(false)}
               onCancel={() => setIsDialogOpen(false)}

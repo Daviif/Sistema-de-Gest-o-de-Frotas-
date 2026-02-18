@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,14 +14,9 @@ type Props = {
 
 export default function VeiculosForm({ onSuccess, onCancel, initialData }: Props) {
   const isEdit = !!initialData
-  const [form, setForm] = useState<Partial<NewVehicle>>({})
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const create = useCreateVehicle()
-  const updateMutation = useUpdateVehicle()
-
-  useEffect(() => {
+  const [form, setForm] = useState<Partial<NewVehicle>>(() => {
     if (initialData) {
-      setForm({
+      return {
         placa: initialData.placa,
         marca: initialData.marca,
         modelo: initialData.modelo,
@@ -29,11 +24,13 @@ export default function VeiculosForm({ onSuccess, onCancel, initialData }: Props
         tipo: initialData.tipo,
         km_atual: initialData.km_atual ?? undefined,
         capacidade_tanque: initialData.capacidade_tanque ?? undefined,
-      })
-    } else {
-      setForm({})
+      }
     }
-  }, [initialData])
+    return {}
+  })
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const create = useCreateVehicle()
+  const updateMutation = useUpdateVehicle()
 
   function update<K extends keyof NewVehicle>(key: K, value: NewVehicle[K] | undefined) {
     setForm((prev) => ({ ...prev, [key]: value }))

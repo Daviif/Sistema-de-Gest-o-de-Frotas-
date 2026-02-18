@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -37,12 +37,6 @@ export default function ManutencaoForm({ onSuccess, onCancel, initialData }: Pro
   const create = useCreateMaintenance()
   const updateMutation = useUpdateMaintenance()
   const { data: vehicles } = useVehicles()
-
-  useEffect(() => {
-    const next = getInitialForm(initialData)
-    setForm(next)
-    formRef.current = next
-  }, [initialData])
 
   function update<K extends keyof NewMaintenance>(key: K, value: NewMaintenance[K] | undefined) {
     const next = { ...formRef.current, [key]: value }

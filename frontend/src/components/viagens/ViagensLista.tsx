@@ -1,5 +1,5 @@
 // src/components/viagens/ViagensLista.tsx
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Plus, MapPin, Calendar, User, Truck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -36,12 +36,6 @@ export default function TripsList() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [tripToCancel, setTripToCancel] = useState<Trip | null>(null)
   const [cancelMotivo, setCancelMotivo] = useState('')
-
-  useEffect(() => {
-    if (tripToEditObservacoes) {
-      setObservacoesText(tripToEditObservacoes.observacoes ?? '')
-    }
-  }, [tripToEditObservacoes])
 
   async function handleSaveObservacoes() {
     if (!tripToEditObservacoes) return
@@ -208,6 +202,7 @@ export default function TripsList() {
                 className="shadow-sm"
                 onClick={() => {
                   setTripToEditObservacoes(trip)
+                  setObservacoesText(trip.observacoes ?? '')
                   setEditObservacoesOpen(true)
                 }}
               >

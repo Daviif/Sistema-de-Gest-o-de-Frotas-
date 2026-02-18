@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,24 +15,21 @@ type Props = {
 
 export default function MotoristaForm({ onSuccess, onCancel, initialData }: Props) {
   const isEdit = !!initialData
-  const [form, setForm] = useState<Partial<NewDriver>>({})
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const create = useCreateDriver()
-  const updateMutation = useUpdateDriver()
-
-  useEffect(() => {
+  const [form, setForm] = useState<Partial<NewDriver>>(() => {
     if (initialData) {
-      setForm({
+      return {
         nome: initialData.nome,
         cpf: initialData.cpf,
         cnh: initialData.cnh,
         cat_cnh: initialData.cat_cnh,
         validade_cnh: initialData.validade_cnh,
-      })
-    } else {
-      setForm({})
+      }
     }
-  }, [initialData])
+    return {}
+  })
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const create = useCreateDriver()
+  const updateMutation = useUpdateDriver()
 
   function update<K extends keyof NewDriver>(key: K, value: NewDriver[K] | undefined) {
     setForm((prev) => ({ ...prev, [key]: value }))

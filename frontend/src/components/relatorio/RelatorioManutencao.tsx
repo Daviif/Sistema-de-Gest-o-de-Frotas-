@@ -33,8 +33,6 @@ export default function RelatorioManutencao({ meses }: Props) {
   }
 
   const criticos = manutencoes.filter(m => m.status_alerta === 'critico')
-  const atencao = manutencoes.filter(m => m.status_alerta === 'atencao')
-  const ok = manutencoes.filter(m => m.status_alerta === 'ok')
 
   const getStatusColor = (status: string) => {
     switch (status) {

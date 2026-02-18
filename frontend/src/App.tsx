@@ -13,6 +13,7 @@ import MaintenanceList from '@/components/manutencao/ManutencaoLista'
 import AbastecimentoLista from '@/components/abastecimento/AbastecimentoLista'
 import CidadeLista from '@/components/cidade/CidadeLista'
 import Relatorio from '@/components/relatorio/RelatorioView'
+import EstatisticaView from '@/components/estatistica/EstatisticaView'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<DashboardView />} />
+            <Route path="/estatisticas" element={<EstatisticaView />} />
             <Route path="/veiculos" element={<VehiclesList />} />
             <Route path="/motoristas" element={<DriversList />} />
             <Route path="/viagens" element={<TripsList />} />

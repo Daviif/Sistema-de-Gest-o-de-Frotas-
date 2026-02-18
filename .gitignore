@@ -27,3 +27,8 @@ replay_pid*
 *.yml
 
 node_modules/
+
+# Environment files
+.env
+.env.*
+!.env.example

@@ -81,9 +81,11 @@ export default function RelatorioComparativo({ meses }: Props) {
                 <YAxis yAxisId="left" tickFormatter={(v) => `R$ ${(v / 1000).toFixed(0)}k`} />
                 <YAxis yAxisId="right" orientation="right" />
                 <Tooltip 
-                  formatter={(value: number, name: string) => {
-                    if (name === 'Viagens' || name === 'KM') return value.toLocaleString('pt-BR')
-                    return formatCurrency(value)
+                  formatter={(value, name) => {
+                    const numericValue = Number(value ?? 0)
+                    const key = String(name)
+                    if (key === 'Viagens' || key === 'KM') return numericValue.toLocaleString('pt-BR')
+                    return formatCurrency(numericValue)
                   }}
                 />
                 <Legend />

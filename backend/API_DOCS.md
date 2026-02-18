@@ -86,7 +86,7 @@ Query params: ?status=ativo|em_viagem|inativo
 
 ### Buscar motorista
 ```
-GET /motoristas/:id
+GET /motoristas/:cpf
 ```
 
 ### Criar motorista
@@ -110,17 +110,17 @@ Body: {
 
 ### Atualizar motorista
 ```
-PUT /motoristas/:id
+PUT /motoristas/:cpf
 ```
 
 ### Deletar motorista
 ```
-DELETE /motoristas/:id
+DELETE /motoristas/:cpf
 ```
 
 ### Histórico do motorista
 ```
-GET /motoristas/:id/historico
+GET /motoristas/:cpf/historico
 ```
 
 ### Motoristas disponíveis
@@ -139,7 +139,7 @@ GET /viagens
 Query params: 
   ?status=planejada|em_andamento|finalizada|cancelada
   &id_veiculo=123
-  &id_motorista=456
+  &cpf_motorista=12345678901
   &limit=50
 ```
 
@@ -167,7 +167,7 @@ Cria viagem automática com:
 POST /viagens/criar
 Body: {
   "id_veiculo": 1,
-  "id_motorista": 2,        // opcional
+  "cpf_motorista": "12345678901", // opcional
   "cidade_origem": 10,       // opcional
   "cidade_destino": 20       // opcional
 }

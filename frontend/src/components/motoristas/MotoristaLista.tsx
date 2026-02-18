@@ -111,6 +111,7 @@ export default function DriversList() {
           </DialogHeader>
 
           <MotoristaForm
+            key={driverToEdit?.cpf ?? 'new'}
             initialData={driverToEdit}
             onSuccess={() => setIsDialogOpen(false)}
             onCancel={() => setIsDialogOpen(false)}

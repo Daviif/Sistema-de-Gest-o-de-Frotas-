@@ -9,6 +9,7 @@ import motoristasRoutes from './routes/motoristas.routes'
 import manutencaoRoutes from './routes/manutencao.routes'
 import estatisticasRoutes from './routes/estatisticas.routes'
 import relatoriosRoutes from './routes/relatorios.routes'
+import healthRoutes from './routes/health.routes'
 
 const app = express()
 
@@ -23,13 +24,7 @@ app.use((req, res, next) => {
 })
 
 // Health check
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime()
-  })
-})
+app.use('/health', healthRoutes)
 
 // Rotas
 app.use('/veiculos', veiculosRoutes)
